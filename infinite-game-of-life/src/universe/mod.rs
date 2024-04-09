@@ -1,7 +1,7 @@
 mod sparse_grid;
 use sparse_grid::SparseGrid;
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Status {
     Dead,
     Alive,
@@ -16,6 +16,10 @@ impl Universe {
         Universe {
             inhabitants: SparseGrid::new(),
         }
+    }
+
+    fn set_alive(self: &mut Self, row_index: i8, column_index: i8) -> () {
+        self.inhabitants.append_value(row_index, column_index)
     }
 
     fn is_alive(self: &Self, row_index: i8, column_index: i8) -> bool {
@@ -89,5 +93,78 @@ impl Universe {
             Status::Alive,
             Status::Dead,
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Status, Universe};
+
+    #[test]
+    fn should_converge_to_a_square() {
+        let mut universe = Universe::new();
+        universe.set_alive(1, 1);
+        universe.set_alive(1, 2);
+        universe.set_alive(2, 1);
+        let expected_universe = vec![
+            vec![Status::Dead, Status::Dead, Status::Dead, Status::Dead],
+            vec![Status::Dead, Status::Alive, Status::Alive, Status::Dead],
+            vec![Status::Dead, Status::Alive, Status::Dead, Status::Dead],
+            vec![Status::Dead, Status::Dead, Status::Dead, Status::Dead],
+            vec![Status::Dead, Status::Dead, Status::Dead, Status::Dead],
+        ];
+        assert_eq!(universe.window(0, 0, 5, 4), expected_universe);
+
+        let universe = universe.next_gen();
+        let expected_universe = vec![
+            vec![Status::Dead, Status::Dead, Status::Dead, Status::Dead],
+            vec![Status::Dead, Status::Alive, Status::Alive, Status::Dead],
+            vec![Status::Dead, Status::Alive, Status::Alive, Status::Dead],
+            vec![Status::Dead, Status::Dead, Status::Dead, Status::Dead],
+            vec![Status::Dead, Status::Dead, Status::Dead, Status::Dead],
+        ];
+        assert_eq!(universe.window(0, 0, 5, 4), expected_universe);
+
+        let universe = universe.next_gen();
+        assert_eq!(universe.window(0, 0, 5, 4), expected_universe);
+    }
+
+    #[test]
+    fn should_converge_to_nothing_after_passing_to_one_cell() {
+        let mut universe = Universe::new();
+        universe.set_alive(1, 1);
+        universe.set_alive(1, 3);
+        universe.set_alive(3, 1);
+        let expected_universe = vec![
+            vec![Status::Dead, Status::Dead, Status::Dead, Status::Dead],
+            vec![Status::Dead, Status::Alive, Status::Dead, Status::Alive],
+            vec![Status::Dead, Status::Dead, Status::Dead, Status::Dead],
+            vec![Status::Dead, Status::Alive, Status::Dead, Status::Dead],
+            vec![Status::Dead, Status::Dead, Status::Dead, Status::Dead],
+        ];
+        assert_eq!(universe.window(0, 0, 5, 4), expected_universe);
+
+        let universe = universe.next_gen();
+        let expected_universe = vec![
+            vec![Status::Dead, Status::Dead, Status::Dead, Status::Dead],
+            vec![Status::Dead, Status::Dead, Status::Dead, Status::Dead],
+            vec![Status::Dead, Status::Dead, Status::Alive, Status::Dead],
+            vec![Status::Dead, Status::Dead, Status::Dead, Status::Dead],
+            vec![Status::Dead, Status::Dead, Status::Dead, Status::Dead],
+        ];
+        assert_eq!(universe.window(0, 0, 5, 4), expected_universe);
+
+        let universe = universe.next_gen();
+        let expected_universe = vec![
+            vec![Status::Dead, Status::Dead, Status::Dead, Status::Dead],
+            vec![Status::Dead, Status::Dead, Status::Dead, Status::Dead],
+            vec![Status::Dead, Status::Dead, Status::Dead, Status::Dead],
+            vec![Status::Dead, Status::Dead, Status::Dead, Status::Dead],
+            vec![Status::Dead, Status::Dead, Status::Dead, Status::Dead],
+        ];
+        assert_eq!(universe.window(0, 0, 5, 4), expected_universe);
+
+        let universe = universe.next_gen();
+        assert_eq!(universe.window(0, 0, 5, 4), expected_universe);
     }
 }
