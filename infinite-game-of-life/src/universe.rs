@@ -18,7 +18,7 @@ impl Universe {
     }
 
     fn append_value(data: &mut HashMap<i8, HashSet<i8>>, row_index: i8, column_index: i8) -> () {
-        let row = data.get(&row_index);
+        let row = data.get_mut(&row_index);
         match row {
             Some(row) => {
                 row.insert(column_index);
@@ -70,16 +70,16 @@ impl Universe {
                     Self::neighborhood(*row_index, *column_index)
                 {
                     if !Self::has_value(&already_scanned, new_row_index, new_column_index) {
-                        Self::append_value(&already_scanned, new_row_index, new_column_index);
+                        Self::append_value(&mut already_scanned, new_row_index, new_column_index);
                         let current_alive = self.is_alive(new_row_index, new_column_index);
                         let num_alives = Self::neighborhood(*row_index, *column_index)
                             .iter()
                             .filter(|(r, c)| self.is_alive(*r, *c))
                             .count();
                         if current_alive && (num_alives == 3 || num_alives == 4) {
-                            Self::append_value(&new_inhabitants, new_row_index, new_column_index);
+                            Self::append_value(&mut new_inhabitants, new_row_index, new_column_index);
                         } else if !current_alive && num_alives == 3 {
-                            Self::append_value(&new_inhabitants, new_row_index, new_column_index);
+                            Self::append_value(&mut new_inhabitants, new_row_index, new_column_index);
                         }
                     }
                 }
