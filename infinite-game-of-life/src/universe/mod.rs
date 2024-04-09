@@ -56,21 +56,25 @@ impl Universe {
         let mut new_inhabitants = SparseGrid::new();
         let mut already_scanned = SparseGrid::new();
 
-        for (row_index, column_index) in self.inhabitants.iter() {
-            for (new_row_index, new_column_index) in Self::neighborhood(row_index, column_index) {
-                if !already_scanned.has_value(new_row_index, new_column_index) {
-                    already_scanned.append_value(new_row_index, new_column_index);
-                    let current_alive = self.is_alive(new_row_index, new_column_index);
-                    let num_alives = Self::neighborhood(row_index, column_index)
-                        .iter()
-                        .filter(|(r, c)| self.is_alive(*r, *c))
-                        .count();
-                    if current_alive && (num_alives == 3 || num_alives == 4) {
-                        new_inhabitants.append_value(new_row_index, new_column_index);
-                    } else if !current_alive && num_alives == 3 {
-                        new_inhabitants.append_value(new_row_index, new_column_index);
-                    }
-                }
+        let possible_inhabitants = self
+            .inhabitants
+            .iter()
+            .flat_map(|inhabitant| Self::neighborhood(inhabitant.0, inhabitant.1));
+        for (row_index, column_index) in possible_inhabitants {
+            if already_scanned.has_value(row_index, column_index) {
+                continue;
+            }
+            already_scanned.append_value(row_index, column_index);
+            
+            let current_alive = self.is_alive(row_index, column_index);
+            let num_alives = Self::neighborhood(row_index, column_index)
+                .iter()
+                .filter(|(r, c)| self.is_alive(*r, *c))
+                .count();
+            if current_alive && (num_alives == 3 || num_alives == 4) {
+                new_inhabitants.append_value(row_index, column_index);
+            } else if !current_alive && num_alives == 3 {
+                new_inhabitants.append_value(row_index, column_index);
             }
         }
         Universe {
