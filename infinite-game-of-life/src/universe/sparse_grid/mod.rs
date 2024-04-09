@@ -33,30 +33,6 @@ impl SparseGrid {
         }
     }
 
-    pub fn window<T: Clone>(
-        &self,
-        row_index_start: i8,
-        column_index_start: i8,
-        row_index_end: i8,
-        column_index_end: i8,
-        with_value: T,
-        without_value: T,
-    ) -> Vec<Vec<T>> {
-        let mut content = Vec::new();
-        for row_index in row_index_start..=row_index_end {
-            let mut content_row = Vec::new();
-            for column_index in column_index_start..=column_index_end {
-                if self.has_value(row_index, column_index) {
-                    content_row.push(with_value.clone())
-                } else {
-                    content_row.push(without_value.clone())
-                }
-            }
-            content.push(content_row);
-        }
-        content
-    }
-
     pub fn iter(&self) -> SparseGridIter<'_> {
         SparseGridIter {
             inner_iter: Box::new(
@@ -128,40 +104,5 @@ mod tests {
         iterated.sort_by(|t1, t2| sort_tuples(*t1, *t2));
         expected.sort_by(|t1, t2| sort_tuples(*t1, *t2));
         assert_eq!(iterated.sort(), expected.sort());
-    }
-
-    #[test]
-    fn should_be_able_to_export_a_window_on_part_data() {
-        let mut grid = SparseGrid::new();
-        grid.append_value(-1, 0);
-        grid.append_value(-1, 1);
-        grid.append_value(2, 1);
-        grid.append_value(2, 5);
-        grid.append_value(3, 10);
-        let expected = vec![
-            vec![false, false, false, false, false],
-            vec![false, false, false, false, false],
-            vec![false, true, false, false, false],
-            vec![false, false, false, false, false],
-            vec![false, false, false, false, false],
-        ];
-        assert_eq!(grid.window(0, 0, 4, 4, true, false), expected);
-    }
-
-    #[test]
-    fn should_be_able_to_export_a_negative_window_on_part_data() {
-        let mut grid = SparseGrid::new();
-        grid.append_value(-1, 0);
-        grid.append_value(-1, 1);
-        grid.append_value(2, 1);
-        grid.append_value(2, 5);
-        grid.append_value(3, 10);
-        let expected = vec![
-            vec![false, false, true, true, false, false],
-            vec![false, false, false, false, false, false],
-            vec![false, false, false, false, false, false],
-            vec![false, false, false, true, false, false],
-        ];
-        assert_eq!(grid.window(-1, -2, 2, 3, true, false), expected);
     }
 }

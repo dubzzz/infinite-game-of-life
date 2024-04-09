@@ -1,5 +1,8 @@
 mod sparse_grid;
+mod window;
+
 use sparse_grid::SparseGrid;
+use window::Window;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Status {
@@ -26,32 +29,6 @@ impl Universe {
         self.inhabitants.has_value(row_index, column_index)
     }
 
-    fn neighborhood(row_index: i8, column_index: i8) -> Vec<(i8, i8)> {
-        vec![
-            (
-                row_index.overflowing_sub(1).0,
-                column_index.overflowing_sub(1).0,
-            ),
-            (row_index.overflowing_sub(1).0, column_index),
-            (
-                row_index.overflowing_sub(1).0,
-                column_index.overflowing_add(1).0,
-            ),
-            (row_index, column_index.overflowing_sub(1).0),
-            (row_index, column_index),
-            (row_index, column_index.overflowing_add(1).0),
-            (
-                row_index.overflowing_add(1).0,
-                column_index.overflowing_sub(1).0,
-            ),
-            (row_index.overflowing_add(1).0, column_index),
-            (
-                row_index.overflowing_add(1).0,
-                column_index.overflowing_add(1).0,
-            ),
-        ]
-    }
-
     pub fn next_gen(self: &Self) -> Self {
         let mut new_inhabitants = SparseGrid::new();
         let mut already_scanned = SparseGrid::new();
@@ -59,7 +36,7 @@ impl Universe {
         let possible_inhabitants = self
             .inhabitants
             .iter()
-            .flat_map(|inhabitant| Self::neighborhood(inhabitant.0, inhabitant.1));
+            .flat_map(|inhabitant| Window::neighborhood(inhabitant.0, inhabitant.1));
         for (row_index, column_index) in possible_inhabitants {
             if already_scanned.has_value(row_index, column_index) {
                 continue;
@@ -67,7 +44,7 @@ impl Universe {
             already_scanned.append_value(row_index, column_index);
 
             let current_alive = self.is_alive(row_index, column_index);
-            let num_alives = Self::neighborhood(row_index, column_index)
+            let num_alives = Window::neighborhood(row_index, column_index)
                 .iter()
                 .filter(|(r, c)| self.is_alive(*r, *c))
                 .count();
@@ -89,13 +66,19 @@ impl Universe {
         row_index_end: i8,
         column_index_end: i8,
     ) -> Vec<Vec<Status>> {
-        self.inhabitants.window(
+        Window::scan(
             row_index_start,
             column_index_start,
             row_index_end,
             column_index_end,
-            Status::Alive,
-            Status::Dead,
+            self,
+            |data, row_index, column_index| {
+                if data.is_alive(row_index, column_index) {
+                    Status::Alive
+                } else {
+                    Status::Dead
+                }
+            },
         )
     }
 }
