@@ -43,9 +43,9 @@ impl SparseGrid {
         without_value: T,
     ) -> Vec<Vec<T>> {
         let mut content = Vec::new();
-        for row_index in row_index_start..row_index_end {
+        for row_index in row_index_start..=row_index_end {
             let mut content_row = Vec::new();
-            for column_index in column_index_start..column_index_end {
+            for column_index in column_index_start..=column_index_end {
                 if self.has_value(row_index, column_index) {
                     content_row.push(with_value.clone())
                 } else {
@@ -82,9 +82,8 @@ impl<'a> Iterator for SparseGridIter<'a> {
 
 #[cfg(test)]
 mod tests {
-    use std::cmp::Ordering;
-
     use crate::universe::sparse_grid::SparseGrid;
+    use std::cmp::Ordering;
 
     fn sort_tuples(t1: (i8, i8), t2: (i8, i8)) -> Ordering {
         if t1.0 == t2.0 && t1.1 == t2.1 {
@@ -146,7 +145,7 @@ mod tests {
             vec![false, false, false, false, false],
             vec![false, false, false, false, false],
         ];
-        assert_eq!(grid.window(0, 0, 5, 5, true, false), expected);
+        assert_eq!(grid.window(0, 0, 4, 4, true, false), expected);
     }
 
     #[test]
@@ -163,6 +162,6 @@ mod tests {
             vec![false, false, false, false, false, false],
             vec![false, false, false, true, false, false],
         ];
-        assert_eq!(grid.window(-1, -2, 3, 4, true, false), expected);
+        assert_eq!(grid.window(-1, -2, 2, 3, true, false), expected);
     }
 }
