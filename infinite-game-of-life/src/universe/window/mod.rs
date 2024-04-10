@@ -1,3 +1,5 @@
+mod tests;
+
 pub struct Window {}
 
 impl Window {
@@ -49,6 +51,3 @@ impl Window {
         ]
     }
 }
-
-#[cfg(test)]
-mod tests {}
