@@ -1,6 +1,16 @@
 import { UniverseWasm } from "gol-engine";
 
+enum Mode {
+  Move = "move",
+}
+type Point = { x: number; y: number };
 type Origin = { x: number; y: number; zoom: number };
+
+type MoveAction = {
+  mode: Mode.Move;
+  initialOrigin: Point;
+  initialMousePosition: Point;
+};
 
 class UI {
   readonly #screen: HTMLCanvasElement;
@@ -15,27 +25,50 @@ class UI {
     this.#screen.style.right = "0";
     this.#screen.style.height = "100vh";
     this.#screen.style.width = "100vw";
+    this.#screen.className = `mode-${Mode.Move}`;
     element.appendChild(this.#screen);
     this.#syncScreenSize();
 
-    // Setup dummy Universe
+    // Setup empty Universe
     this.#universe = UniverseWasm.new();
     this.#universe = this.#universe.add(10, 10);
     this.#universe = this.#universe.add(11, 10);
     this.#universe = this.#universe.add(12, 10);
-    this.#universe = this.#universe.add(10, 12);
-    this.#universe = this.#universe.add(11, 12);
-    this.#universe = this.#universe.add(12, 12);
-    this.#universe = this.#universe.add(10, 14);
-    this.#universe = this.#universe.add(11, 14);
-    this.#universe = this.#universe.add(12, 14);
-    this.#universe = this.#universe.add(10, 20);
-    this.#universe = this.#universe.add(11, 20);
-    this.#universe = this.#universe.add(12, 20);
-    this.#universe = this.#universe.add(0, 20);
 
     // Place origin
     this.#origin = { x: 0, y: 0, zoom: 20 };
+
+    // Connect user actions
+    let action: MoveAction | undefined = undefined;
+    this.#screen.addEventListener("mousedown", (event) => {
+      if (event.button !== 0) {
+        return;
+      }
+      action = {
+        mode: Mode.Move,
+        initialOrigin: this.#origin,
+        initialMousePosition: { x: event.clientX, y: event.clientY },
+      };
+    });
+    this.#screen.addEventListener("mousemove", (event) => {
+      if (action === undefined || action.mode !== Mode.Move) {
+        return;
+      }
+      const dx = event.clientX - action.initialMousePosition.x;
+      const dy = event.clientY - action.initialMousePosition.y;
+      this.#origin = {
+        ...this.#origin,
+        x: action.initialOrigin.x - dx,
+        y: action.initialOrigin.y - dy,
+      };
+      this.redrawScene();
+    });
+    this.#screen.addEventListener("mouseup", (event) => {
+      if (event.button !== 0) {
+        return;
+      }
+      action = undefined;
+    });
 
     // Connect drawing and observers
     const screenObserver = new ResizeObserver(() => {
