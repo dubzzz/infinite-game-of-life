@@ -199,6 +199,15 @@ class UI {
       ) {
         patternIndex =
           (patternIndex + dzoom + patterns.length) % patterns.length;
+
+        const point = this.#pointInScreenToPointInScene({
+          x: event.clientX,
+          y: event.clientY,
+        });
+        for (const delta of patterns[patternIndex]) {
+          this.#halo.push({ x: point.x + delta.x, y: point.y + delta.y });
+        }
+        this.redrawScene();
         return;
       }
       const newZoom = Math.max(1, this.#origin.zoom - dzoom);
