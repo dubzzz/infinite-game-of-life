@@ -17,6 +17,63 @@ type DrawAction = {
 };
 type Action = MoveAction | DrawAction;
 
+const patterns: Point[][] = [
+  [{ x: 0, y: 0 }],
+  [
+    { x: -1, y: 0 },
+    { x: 0, y: 0 },
+    { x: 1, y: 0 },
+  ],
+  [
+    { x: -1, y: 0 },
+    { x: 0, y: 0 },
+    { x: 1, y: 0 },
+    { x: 2, y: 0 },
+  ],
+  [
+    { x: -1, y: 0 },
+    { x: 0, y: 0 },
+    { x: 1, y: 0 },
+    { x: -1, y: 1 },
+  ],
+  [
+    { x: -1, y: 0 },
+    { x: 0, y: 0 },
+    { x: 1, y: 0 },
+    { x: -2, y: 1 },
+  ],
+  [
+    { x: -1, y: 0 },
+    { x: 0, y: 0 },
+    { x: 1, y: 0 },
+    { x: 0, y: 1 },
+  ],
+  [
+    { x: -1, y: -1 },
+    { x: -1, y: 0 },
+    { x: 0, y: -1 },
+    { x: 0, y: 1 },
+    { x: 1, y: 0 },
+  ],
+  [
+    { x: -1, y: -1 },
+    { x: -1, y: 0 },
+    { x: 0, y: -1 },
+    { x: 0, y: 1 },
+    { x: 1, y: 0 },
+    { x: 1, y: 1 },
+  ],
+  [
+    { x: -1, y: 0 },
+    { x: 0, y: -1 },
+    { x: -1, y: 1 },
+    { x: 1, y: -1 },
+    { x: 0, y: 2 },
+    { x: 2, y: 0 },
+    { x: 1, y: 1 },
+  ],
+];
+
 class UI {
   readonly #screen: HTMLCanvasElement;
   #universe: UniverseWasm;
@@ -46,6 +103,7 @@ class UI {
     this.#halo = [];
 
     // Connect user actions
+    let patternIndex = 0;
     let action: Action | undefined = undefined;
     this.#screen.addEventListener("mousedown", (event) => {
       if (event.button !== 0) {
@@ -57,7 +115,12 @@ class UI {
           x: event.clientX,
           y: event.clientY,
         });
-        this.#universe = this.#universe.add(point.y, point.x);
+        for (const delta of patterns[patternIndex]) {
+          this.#universe = this.#universe.add(
+            point.y + delta.y,
+            point.x + delta.x
+          );
+        }
         this.redrawScene();
         action = {
           mode: Mode.Draw,
@@ -77,7 +140,10 @@ class UI {
             x: event.clientX,
             y: event.clientY,
           });
-          this.#halo = [point];
+          this.#halo = [];
+          for (const delta of patterns[patternIndex]) {
+            this.#halo.push({ x: point.x + delta.x, y: point.y + delta.y });
+          }
           this.redrawScene();
           return;
         }
@@ -100,7 +166,12 @@ class UI {
             x: event.clientX,
             y: event.clientY,
           });
-          this.#universe = this.#universe.add(point.y, point.x);
+          for (const delta of patterns[patternIndex]) {
+            this.#universe = this.#universe.add(
+              point.y + delta.y,
+              point.x + delta.x
+            );
+          }
           this.redrawScene();
           break;
         }
@@ -113,7 +184,16 @@ class UI {
       action = undefined;
     });
     this.#screen.addEventListener("wheel", (event) => {
+      event.preventDefault();
       const dzoom = Math.sign(event.deltaY);
+      if (
+        (event.ctrlKey && action === undefined) ||
+        action?.mode === Mode.Draw
+      ) {
+        patternIndex =
+          (patternIndex + dzoom + patterns.length) % patterns.length;
+        return;
+      }
       const newZoom = Math.max(1, this.#origin.zoom - dzoom);
       // We aim for:
       // >  o{x,y}: cell corresponding to the origina of the screen
@@ -136,7 +216,6 @@ class UI {
       this.redrawScene();
     });
     document.addEventListener("keyup", (event) => {
-      console.log(event);
       if (!event.ctrlKey && this.#halo.length !== 0) {
         this.#halo = [];
         this.redrawScene();
