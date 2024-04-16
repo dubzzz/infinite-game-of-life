@@ -134,6 +134,26 @@ class UI {
         };
         return;
       }
+      if (event.altKey) {
+        const canvasWidth = this.#screen.width;
+        const canvasHeight = this.#screen.height;
+        const sceneMinX = Math.floor(this.#origin.x / this.#origin.zoom);
+        const sceneMaxX = Math.ceil(
+          (this.#origin.x + canvasWidth - 1) / this.#origin.zoom
+        );
+        const sceneMinY = Math.floor(this.#origin.y / this.#origin.zoom);
+        const sceneMaxY = Math.ceil(
+          (this.#origin.y + canvasHeight - 1) / this.#origin.zoom
+        );
+        for (let y = sceneMinY; y <= sceneMaxY; ++y) {
+          for (let x = sceneMinX; x <= sceneMaxX; ++x) {
+            if (Math.random() < 0.25) {
+              this.#universe = this.#universe.add(y, x);
+            }
+          }
+        }
+        this.redrawScene();
+      }
       action = {
         mode: Mode.Move,
         initialOrigin: this.#origin,
