@@ -15,12 +15,14 @@ pub struct UniverseWasm {
 
 #[wasm_bindgen]
 impl UniverseWasm {
+    #[wasm_bindgen]
     pub fn new() -> UniverseWasm {
         UniverseWasm {
             universe: Universe::new(),
         }
     }
 
+    #[wasm_bindgen]
     pub fn add(&mut self, row_index: i8, column_index: i8) -> UniverseWasm {
         let mut new_universe = Universe::from(&self.universe);
         new_universe.set_alive(row_index, column_index);
@@ -29,12 +31,14 @@ impl UniverseWasm {
         }
     }
 
+    #[wasm_bindgen]
     pub fn next(&self) -> UniverseWasm {
         UniverseWasm {
             universe: self.universe.next_gen(),
         }
     }
 
+    #[wasm_bindgen]
     pub fn window(
         &self,
         row_index_start: i8,

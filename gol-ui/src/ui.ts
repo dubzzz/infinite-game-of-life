@@ -18,7 +18,7 @@ class UI {
     element.appendChild(this.#screen);
 
     // Setup dummy Universe
-    this.#universe = new UniverseWasm();
+    this.#universe = UniverseWasm.new();
     this.#universe = this.#universe.add(10, 10);
     this.#universe = this.#universe.add(11, 10);
     this.#universe = this.#universe.add(12, 10);
