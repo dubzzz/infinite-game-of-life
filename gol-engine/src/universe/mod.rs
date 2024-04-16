@@ -22,15 +22,21 @@ impl Universe {
         }
     }
 
-    fn set_alive(self: &mut Self, row_index: i8, column_index: i8) -> () {
+    pub fn from(universe: &Universe) -> Universe {
+        Universe {
+            inhabitants: SparseGrid::from(&universe.inhabitants),
+        }
+    }
+
+    pub fn set_alive(&mut self, row_index: i8, column_index: i8) -> () {
         self.inhabitants.append_value(row_index, column_index)
     }
 
-    fn is_alive(self: &Self, row_index: i8, column_index: i8) -> bool {
+    fn is_alive(&self, row_index: i8, column_index: i8) -> bool {
         self.inhabitants.has_value(row_index, column_index)
     }
 
-    pub fn next_gen(self: &Self) -> Self {
+    pub fn next_gen(&self) -> Self {
         let mut new_inhabitants = SparseGrid::new();
         let mut already_scanned = SparseGrid::new();
 

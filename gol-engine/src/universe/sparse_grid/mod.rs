@@ -14,6 +14,12 @@ impl SparseGrid {
         }
     }
 
+    pub fn from(sparse_grid: &SparseGrid) -> SparseGrid {
+        SparseGrid {
+            grid: sparse_grid.grid.clone(),
+        }
+    }
+
     pub fn has_value(&self, row_index: i8, column_index: i8) -> bool {
         self.grid
             .get(&row_index)
