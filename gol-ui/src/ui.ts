@@ -69,6 +69,15 @@ class UI {
       }
       action = undefined;
     });
+    this.#screen.addEventListener("wheel", (event) => {
+      console.log(event.deltaY);
+      const dzoom = Math.sign(event.deltaY);
+      this.#origin = {
+        ...this.#origin,
+        zoom: Math.max(1, this.#origin.zoom + dzoom),
+      };
+      this.redrawScene();
+    });
 
     // Connect drawing and observers
     const screenObserver = new ResizeObserver(() => {
