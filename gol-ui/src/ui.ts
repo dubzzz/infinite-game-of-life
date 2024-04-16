@@ -67,6 +67,7 @@ class UI {
         canvasData.data[canvasIndex + 3] = 255;
       }
     }
+    ctx.putImageData(canvasData, 0, 0);
   }
 }
 
