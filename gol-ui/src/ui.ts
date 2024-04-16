@@ -85,12 +85,12 @@ class UI {
       this.#origin = {
         x:
           this.#origin.x +
-          Math.round(event.clientX / this.#origin.zoom) -
-          Math.round(event.clientX / newZoom),
+          event.clientX / this.#origin.zoom -
+          event.clientX / newZoom,
         y:
           this.#origin.y +
-          Math.round(event.clientY / this.#origin.zoom) -
-          Math.round(event.clientY / newZoom),
+          event.clientY / this.#origin.zoom -
+          event.clientY / newZoom,
         zoom: newZoom,
       };
       this.redrawScene();
