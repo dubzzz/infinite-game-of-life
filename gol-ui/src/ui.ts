@@ -2,6 +2,7 @@ import { UniverseWasm } from "gol-engine";
 
 enum Mode {
   Move = "move",
+  Draw = "draw",
 }
 type Point = { x: number; y: number };
 type Origin = { x: number; y: number; zoom: number };
@@ -11,11 +12,16 @@ type MoveAction = {
   initialOrigin: Point;
   initialMousePosition: Point;
 };
+type DrawAction = {
+  mode: Mode.Draw;
+};
+type Action = MoveAction | DrawAction;
 
 class UI {
   readonly #screen: HTMLCanvasElement;
   #universe: UniverseWasm;
   #origin: Origin;
+  #halo: Point[];
 
   constructor(element: HTMLDivElement) {
     // Setup empty screen
@@ -37,11 +43,25 @@ class UI {
 
     // Place origin
     this.#origin = { x: 0, y: 0, zoom: 20 };
+    this.#halo = [];
 
     // Connect user actions
-    let action: MoveAction | undefined = undefined;
+    let action: Action | undefined = undefined;
     this.#screen.addEventListener("mousedown", (event) => {
       if (event.button !== 0) {
+        return;
+      }
+      this.#halo = [];
+      if (event.ctrlKey) {
+        const point = this.#pointInScreenToPointInScene({
+          x: event.clientX,
+          y: event.clientY,
+        });
+        this.#universe = this.#universe.add(point.y, point.x);
+        this.redrawScene();
+        action = {
+          mode: Mode.Draw,
+        };
         return;
       }
       action = {
@@ -51,17 +71,40 @@ class UI {
       };
     });
     this.#screen.addEventListener("mousemove", (event) => {
-      if (action === undefined || action.mode !== Mode.Move) {
+      if (action === undefined) {
+        if (event.ctrlKey) {
+          const point = this.#pointInScreenToPointInScene({
+            x: event.clientX,
+            y: event.clientY,
+          });
+          this.#halo = [point];
+          this.redrawScene();
+          return;
+        }
         return;
       }
-      const dx = event.clientX - action.initialMousePosition.x;
-      const dy = event.clientY - action.initialMousePosition.y;
-      this.#origin = {
-        ...this.#origin,
-        x: action.initialOrigin.x - dx,
-        y: action.initialOrigin.y - dy,
-      };
-      this.redrawScene();
+      switch (action.mode) {
+        case Mode.Move: {
+          const dx = event.clientX - action.initialMousePosition.x;
+          const dy = event.clientY - action.initialMousePosition.y;
+          this.#origin = {
+            ...this.#origin,
+            x: action.initialOrigin.x - dx,
+            y: action.initialOrigin.y - dy,
+          };
+          this.redrawScene();
+          break;
+        }
+        case Mode.Draw: {
+          const point = this.#pointInScreenToPointInScene({
+            x: event.clientX,
+            y: event.clientY,
+          });
+          this.#universe = this.#universe.add(point.y, point.x);
+          this.redrawScene();
+          break;
+        }
+      }
     });
     this.#screen.addEventListener("mouseup", (event) => {
       if (event.button !== 0) {
@@ -81,7 +124,6 @@ class UI {
       // >  cx(old) = (ox(old) + clientX) / zoom(old)
       // >  -> cx(new) = cx(old)
       // >  -> ox(new) = (zoom(new) / zoom(old)) * (ox(old) + clientX) - clientX
-
       this.#origin = {
         x:
           (newZoom / this.#origin.zoom) * (this.#origin.x + event.clientX) -
@@ -115,6 +157,12 @@ class UI {
       this.#universe = this.#universe.next();
       this.#drawFirstScene();
     }, 250);
+  }
+
+  #pointInScreenToPointInScene(point: Point): Point {
+    const cx = Math.floor((this.#origin.x + point.x) / this.#origin.zoom);
+    const cy = Math.floor((this.#origin.y + point.y) / this.#origin.zoom);
+    return { x: cx, y: cy };
   }
 
   redrawScene() {
@@ -159,6 +207,29 @@ class UI {
             canvasData.data[canvasIndex + 2] = 0;
             canvasData.data[canvasIndex + 3] = 255;
           }
+        }
+      }
+    }
+    for (const point of this.#halo) {
+      const { x, y } = point;
+      for (let j = 0; j !== this.#origin.zoom; ++j) {
+        const cy = Math.floor(this.#origin.y) + y * this.#origin.zoom + j;
+        if (cy < 0 || cy >= canvasHeight) {
+          continue;
+        }
+        for (let i = 0; i !== this.#origin.zoom; ++i) {
+          const cx = Math.floor(this.#origin.x) + x * this.#origin.zoom + i;
+          if (cx < 0 || cx >= canvasWidth) {
+            continue;
+          }
+          const canvasIndex = (cx + cy * canvasWidth) * 4;
+          canvasData.data[canvasIndex + 0] = 0;
+          canvasData.data[canvasIndex + 1] = Math.max(
+            canvasData.data[canvasIndex + 1],
+            127
+          );
+          canvasData.data[canvasIndex + 2] = 0;
+          canvasData.data[canvasIndex + 3] = 255;
         }
       }
     }
