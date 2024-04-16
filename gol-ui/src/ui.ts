@@ -145,13 +145,20 @@ class UI {
         const sceneMaxY = Math.ceil(
           (this.#origin.y + canvasHeight - 1) / this.#origin.zoom
         );
+        const ys: number[] = [];
+        const xs: number[] = [];
         for (let y = sceneMinY; y <= sceneMaxY; ++y) {
           for (let x = sceneMinX; x <= sceneMaxX; ++x) {
             if (Math.random() < 0.25) {
-              this.#universe = this.#universe.add(y, x);
+              xs.push(x);
+              ys.push(y);
             }
           }
         }
+        this.#universe = this.#universe.add_many(
+          Int32Array.from(ys),
+          Int32Array.from(xs)
+        );
         this.redrawScene();
       }
       action = {
