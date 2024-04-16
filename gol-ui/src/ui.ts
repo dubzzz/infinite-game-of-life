@@ -134,6 +134,26 @@ class UI {
         };
         return;
       }
+      if (event.altKey) {
+        const canvasWidth = this.#screen.width;
+        const canvasHeight = this.#screen.height;
+        const sceneMinX = Math.floor(this.#origin.x / this.#origin.zoom);
+        const sceneMaxX = Math.ceil(
+          (this.#origin.x + canvasWidth - 1) / this.#origin.zoom
+        );
+        const sceneMinY = Math.floor(this.#origin.y / this.#origin.zoom);
+        const sceneMaxY = Math.ceil(
+          (this.#origin.y + canvasHeight - 1) / this.#origin.zoom
+        );
+        for (let y = sceneMinY; y <= sceneMaxY; ++y) {
+          for (let x = sceneMinX; x <= sceneMaxX; ++x) {
+            if (Math.random() < 0.25) {
+              this.#universe = this.#universe.add(y, x);
+            }
+          }
+        }
+        this.redrawScene();
+      }
       action = {
         mode: Mode.Move,
         initialOrigin: this.#origin,
@@ -267,6 +287,12 @@ class UI {
     return { x: cx, y: cy };
   }
 
+  #pointInSceneToPointInScaledScreen(point: Point): Point {
+    const sx = point.x - Math.floor(this.#origin.x / this.#origin.zoom);
+    const sy = point.y - Math.floor(this.#origin.y / this.#origin.zoom);
+    return { x: sx, y: sy };
+  }
+
   redrawScene() {
     const canvasWidth = this.#screen.width;
     const canvasHeight = this.#screen.height;
@@ -286,54 +312,51 @@ class UI {
       sceneMinY + sceneHeight - 1,
       sceneMinX + sceneWidth - 1
     );
+
     const ctx = this.#screen.getContext("2d")!;
     const canvasData = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
+
+    const drawPoint = (
+      y: number,
+      x: number,
+      computeNextGreen: (previousGreen: number) => number
+    ) => {
+      for (let j = 0; j !== this.#origin.zoom; ++j) {
+        const cy = y * this.#origin.zoom + j;
+        if (cy < 0) {
+          continue;
+        }
+        if (cy >= canvasHeight) {
+          break;
+        }
+        for (let i = 0; i !== this.#origin.zoom; ++i) {
+          const cx = x * this.#origin.zoom + i;
+          if (cx < 0) {
+            continue;
+          }
+          if (cx >= canvasWidth) {
+            break;
+          }
+          const canvasIndex = (cx + cy * canvasWidth) * 4;
+          const data = canvasData.data;
+          data[canvasIndex + 0] = 0;
+          data[canvasIndex + 1] = computeNextGreen(data[canvasIndex + 1]);
+          data[canvasIndex + 2] = 0;
+          data[canvasIndex + 3] = 255;
+        }
+      }
+    };
+
     for (let y = 0; y !== sceneHeight; ++y) {
       for (let x = 0; x !== sceneWidth; ++x) {
         const sceneIndex = x + y * sceneWidth;
         const alive = scene[sceneIndex] === "*";
-
-        for (let j = 0; j !== this.#origin.zoom; ++j) {
-          const cy = y * this.#origin.zoom + j;
-          if (cy >= canvasHeight) {
-            break;
-          }
-          for (let i = 0; i !== this.#origin.zoom; ++i) {
-            const cx = x * this.#origin.zoom + i;
-            if (cx >= canvasWidth) {
-              break;
-            }
-            const canvasIndex = (cx + cy * canvasWidth) * 4;
-            canvasData.data[canvasIndex + 0] = 0;
-            canvasData.data[canvasIndex + 1] = alive ? 255 : 0;
-            canvasData.data[canvasIndex + 2] = 0;
-            canvasData.data[canvasIndex + 3] = 255;
-          }
-        }
+        drawPoint(y, x, () => (alive ? 255 : 0));
       }
     }
     for (const point of this.#halo) {
-      const { x, y } = point;
-      for (let j = 0; j !== this.#origin.zoom; ++j) {
-        const cy = -Math.floor(this.#origin.y) + y * this.#origin.zoom + j;
-        if (cy < 0 || cy >= canvasHeight) {
-          continue;
-        }
-        for (let i = 0; i !== this.#origin.zoom; ++i) {
-          const cx = -Math.floor(this.#origin.x) + x * this.#origin.zoom + i;
-          if (cx < 0 || cx >= canvasWidth) {
-            continue;
-          }
-          const canvasIndex = (cx + cy * canvasWidth) * 4;
-          canvasData.data[canvasIndex + 0] = 0;
-          canvasData.data[canvasIndex + 1] = Math.max(
-            canvasData.data[canvasIndex + 1],
-            127
-          );
-          canvasData.data[canvasIndex + 2] = 0;
-          canvasData.data[canvasIndex + 3] = 255;
-        }
-      }
+      const refined = this.#pointInSceneToPointInScaledScreen(point);
+      drawPoint(refined.y, refined.x, (previous) => Math.max(previous, 127));
     }
     ctx.putImageData(canvasData, 0, 0);
   }
