@@ -299,12 +299,12 @@ class UI {
     for (const point of this.#halo) {
       const { x, y } = point;
       for (let j = 0; j !== this.#origin.zoom; ++j) {
-        const cy = Math.floor(this.#origin.y) + y * this.#origin.zoom + j;
+        const cy = -Math.floor(this.#origin.y) + y * this.#origin.zoom + j;
         if (cy < 0 || cy >= canvasHeight) {
           continue;
         }
         for (let i = 0; i !== this.#origin.zoom; ++i) {
-          const cx = Math.floor(this.#origin.x) + x * this.#origin.zoom + i;
+          const cx = -Math.floor(this.#origin.x) + x * this.#origin.zoom + i;
           if (cx < 0 || cx >= canvasWidth) {
             continue;
           }
