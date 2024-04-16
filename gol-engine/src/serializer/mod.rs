@@ -12,6 +12,6 @@ impl Serializer {
         grid.iter()
             .map(|row| -> String { Serializer::row_to_string(row, extrator) })
             .collect::<Vec<_>>()
-            .join("\n")
+            .join("")
     }
 }

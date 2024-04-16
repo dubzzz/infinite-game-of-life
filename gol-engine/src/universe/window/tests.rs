@@ -38,34 +38,34 @@ mod neighborhood {
 
     #[test]
     fn should_compute_neighbors_of_top_left() {
-        let neighbors = Window::neighborhood(i8::min_value(), i8::min_value());
+        let neighbors = Window::neighborhood(isize::min_value(), isize::min_value());
         let expected_neighbors = [
-            (i8::max_value(), i8::max_value()),
-            (i8::max_value(), i8::min_value()),
-            (i8::max_value(), i8::min_value() + 1),
-            (i8::min_value(), i8::max_value()),
-            (i8::min_value(), i8::min_value()),
-            (i8::min_value(), i8::min_value() + 1),
-            (i8::min_value() + 1, i8::max_value()),
-            (i8::min_value() + 1, i8::min_value()),
-            (i8::min_value() + 1, i8::min_value() + 1),
+            (isize::max_value(), isize::max_value()),
+            (isize::max_value(), isize::min_value()),
+            (isize::max_value(), isize::min_value() + 1),
+            (isize::min_value(), isize::max_value()),
+            (isize::min_value(), isize::min_value()),
+            (isize::min_value(), isize::min_value() + 1),
+            (isize::min_value() + 1, isize::max_value()),
+            (isize::min_value() + 1, isize::min_value()),
+            (isize::min_value() + 1, isize::min_value() + 1),
         ];
         assert_eq!(neighbors, expected_neighbors);
     }
 
     #[test]
     fn should_compute_neighbors_of_bottom_right() {
-        let neighbors = Window::neighborhood(i8::max_value(), i8::max_value());
+        let neighbors = Window::neighborhood(isize::max_value(), isize::max_value());
         let expected_neighbors = [
-            (i8::max_value() - 1, i8::max_value() - 1),
-            (i8::max_value() - 1, i8::max_value()),
-            (i8::max_value() - 1, i8::min_value()),
-            (i8::max_value(), i8::max_value() - 1),
-            (i8::max_value(), i8::max_value()),
-            (i8::max_value(), i8::min_value()),
-            (i8::min_value(), i8::max_value() - 1),
-            (i8::min_value(), i8::max_value()),
-            (i8::min_value(), i8::min_value()),
+            (isize::max_value() - 1, isize::max_value() - 1),
+            (isize::max_value() - 1, isize::max_value()),
+            (isize::max_value() - 1, isize::min_value()),
+            (isize::max_value(), isize::max_value() - 1),
+            (isize::max_value(), isize::max_value()),
+            (isize::max_value(), isize::min_value()),
+            (isize::min_value(), isize::max_value() - 1),
+            (isize::min_value(), isize::max_value()),
+            (isize::min_value(), isize::min_value()),
         ];
         assert_eq!(neighbors, expected_neighbors);
     }

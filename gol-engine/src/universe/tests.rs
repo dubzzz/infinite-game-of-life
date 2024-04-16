@@ -73,9 +73,9 @@ mod next_gen {
     #[test]
     fn should_handle_highly_spread_envs() {
         let mut universe = Universe::new();
-        universe.set_alive(i8::min_value(), i8::min_value());
+        universe.set_alive(isize::min_value(), isize::min_value());
         universe.set_alive(0, 0);
-        universe.set_alive(i8::max_value(), i8::max_value());
+        universe.set_alive(isize::max_value(), isize::max_value());
         let expected_universe = vec![
             vec![Status::Dead, Status::Dead, Status::Dead],
             vec![Status::Dead, Status::Alive, Status::Dead],
@@ -99,21 +99,21 @@ mod next_gen {
     fn should_join_the_extreme_parts() {
         let mut universe = Universe::new();
         // left branch
-        universe.set_alive(i8::min_value(), i8::max_value() - 3);
-        universe.set_alive(i8::min_value(), i8::max_value() - 2);
-        universe.set_alive(i8::min_value(), i8::max_value() - 1);
+        universe.set_alive(isize::min_value(), isize::max_value() - 3);
+        universe.set_alive(isize::min_value(), isize::max_value() - 2);
+        universe.set_alive(isize::min_value(), isize::max_value() - 1);
         // right branch
-        universe.set_alive(i8::min_value(), i8::min_value() + 2);
-        universe.set_alive(i8::min_value(), i8::min_value() + 3);
-        universe.set_alive(i8::min_value(), i8::min_value() + 4);
+        universe.set_alive(isize::min_value(), isize::min_value() + 2);
+        universe.set_alive(isize::min_value(), isize::min_value() + 3);
+        universe.set_alive(isize::min_value(), isize::min_value() + 4);
         // top branch
-        universe.set_alive(i8::max_value() - 3, i8::min_value());
-        universe.set_alive(i8::max_value() - 2, i8::min_value());
-        universe.set_alive(i8::max_value() - 1, i8::min_value());
+        universe.set_alive(isize::max_value() - 3, isize::min_value());
+        universe.set_alive(isize::max_value() - 2, isize::min_value());
+        universe.set_alive(isize::max_value() - 1, isize::min_value());
         // bottom branch
-        universe.set_alive(i8::min_value() + 2, i8::min_value());
-        universe.set_alive(i8::min_value() + 3, i8::min_value());
-        universe.set_alive(i8::min_value() + 4, i8::min_value());
+        universe.set_alive(isize::min_value() + 2, isize::min_value());
+        universe.set_alive(isize::min_value() + 3, isize::min_value());
+        universe.set_alive(isize::min_value() + 4, isize::min_value());
         // ....#....
         // ....#....
         // ....#....
@@ -164,10 +164,10 @@ mod next_gen {
         ];
         assert_eq!(
             universe.window(
-                i8::min_value(),
-                i8::min_value(),
-                i8::min_value() + 4,
-                i8::min_value() + 4,
+                isize::min_value(),
+                isize::min_value(),
+                isize::min_value() + 4,
+                isize::min_value() + 4,
             ),
             expected_universe
         );
@@ -223,10 +223,10 @@ mod next_gen {
         ];
         assert_eq!(
             universe.window(
-                i8::min_value(),
-                i8::min_value(),
-                i8::min_value() + 4,
-                i8::min_value() + 4,
+                isize::min_value(),
+                isize::min_value(),
+                isize::min_value() + 4,
+                isize::min_value() + 4,
             ),
             expected_universe
         );
@@ -282,10 +282,10 @@ mod next_gen {
         ];
         assert_eq!(
             universe.window(
-                i8::min_value(),
-                i8::min_value(),
-                i8::min_value() + 4,
-                i8::min_value() + 4,
+                isize::min_value(),
+                isize::min_value(),
+                isize::min_value() + 4,
+                isize::min_value() + 4,
             ),
             expected_universe
         );

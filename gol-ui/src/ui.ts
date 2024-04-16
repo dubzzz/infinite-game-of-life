@@ -16,6 +16,7 @@ class UI {
     this.#screen.style.height = "100vh";
     this.#screen.style.width = "100vw";
     element.appendChild(this.#screen);
+    this.#syncScreenSize();
 
     // Setup dummy Universe
     this.#universe = UniverseWasm.new();
@@ -28,12 +29,27 @@ class UI {
     this.#universe = this.#universe.add(10, 14);
     this.#universe = this.#universe.add(11, 14);
     this.#universe = this.#universe.add(12, 14);
+    this.#universe = this.#universe.add(10, 20);
+    this.#universe = this.#universe.add(11, 20);
+    this.#universe = this.#universe.add(12, 20);
+    this.#universe = this.#universe.add(0, 20);
 
     // Place origin
     this.#origin = { x: 0, y: 0 };
 
-    // Connect drawing
+    // Connect drawing and observers
+    const screenObserver = new ResizeObserver(() => {
+      this.#syncScreenSize();
+      this.redrawScene();
+    });
+    screenObserver.observe(this.#screen);
     this.#drawFirstScene();
+  }
+
+  #syncScreenSize() {
+    const dimensions = this.#screen.getBoundingClientRect();
+    this.#screen.height = dimensions.height;
+    this.#screen.width = dimensions.width;
   }
 
   #drawFirstScene() {
@@ -50,8 +66,8 @@ class UI {
     const scene = this.#universe.window(
       this.#origin.y,
       this.#origin.x,
-      this.#origin.y + canvasHeight,
-      this.#origin.x + canvasWidth
+      this.#origin.y + canvasHeight - 1,
+      this.#origin.x + canvasWidth - 1
     );
     const ctx = this.#screen.getContext("2d")!;
     const canvasData = ctx.getImageData(0, 0, canvasWidth, canvasHeight);

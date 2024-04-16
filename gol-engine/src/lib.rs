@@ -23,7 +23,7 @@ impl UniverseWasm {
     }
 
     #[wasm_bindgen]
-    pub fn add(&mut self, row_index: i8, column_index: i8) -> UniverseWasm {
+    pub fn add(&mut self, row_index: isize, column_index: isize) -> UniverseWasm {
         let mut new_universe = Universe::from(&self.universe);
         new_universe.set_alive(row_index, column_index);
         UniverseWasm {
@@ -41,10 +41,10 @@ impl UniverseWasm {
     #[wasm_bindgen]
     pub fn window(
         &self,
-        row_index_start: i8,
-        column_index_start: i8,
-        row_index_end: i8,
-        column_index_end: i8,
+        row_index_start: isize,
+        column_index_start: isize,
+        row_index_end: isize,
+        column_index_end: isize,
     ) -> String {
         let grid = self.universe.window(
             row_index_start,

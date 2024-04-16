@@ -28,11 +28,11 @@ impl Universe {
         }
     }
 
-    pub fn set_alive(&mut self, row_index: i8, column_index: i8) -> () {
+    pub fn set_alive(&mut self, row_index: isize, column_index: isize) -> () {
         self.inhabitants.append_value(row_index, column_index)
     }
 
-    fn is_alive(&self, row_index: i8, column_index: i8) -> bool {
+    fn is_alive(&self, row_index: isize, column_index: isize) -> bool {
         self.inhabitants.has_value(row_index, column_index)
     }
 
@@ -68,10 +68,10 @@ impl Universe {
 
     pub fn window(
         &self,
-        row_index_start: i8,
-        column_index_start: i8,
-        row_index_end: i8,
-        column_index_end: i8,
+        row_index_start: isize,
+        column_index_start: isize,
+        row_index_end: isize,
+        column_index_end: isize,
     ) -> Vec<Vec<Status>> {
         Window::scan(
             row_index_start,

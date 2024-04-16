@@ -28,7 +28,7 @@ mod iter {
     use crate::universe::sparse_grid::SparseGrid;
     use std::cmp::Ordering;
 
-    fn sort_tuples(t1: (i8, i8), t2: (i8, i8)) -> Ordering {
+    fn sort_tuples(t1: (isize, isize), t2: (isize, isize)) -> Ordering {
         if t1.0 == t2.0 && t1.1 == t2.1 {
             Ordering::Equal
         } else if t1.0 < t2.0 || (t1.0 == t2.0 && t1.1 < t2.1) {

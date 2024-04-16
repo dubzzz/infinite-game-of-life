@@ -4,15 +4,15 @@ pub struct Window {}
 
 impl Window {
     pub fn scan<T, S, F>(
-        row_index_start: i8,
-        column_index_start: i8,
-        row_index_end: i8,
-        column_index_end: i8,
+        row_index_start: isize,
+        column_index_start: isize,
+        row_index_end: isize,
+        column_index_end: isize,
         value: &S,
         extract: F,
     ) -> Vec<Vec<T>>
     where
-        F: Fn(&S, i8, i8) -> T,
+        F: Fn(&S, isize, isize) -> T,
     {
         let mut content = Vec::new();
         for row_index in row_index_start..=row_index_end {
@@ -25,7 +25,7 @@ impl Window {
         content
     }
 
-    pub fn neighborhood(row_index: i8, column_index: i8) -> [(i8, i8); 9] {
+    pub fn neighborhood(row_index: isize, column_index: isize) -> [(isize, isize); 9] {
         [
             (
                 row_index.overflowing_sub(1).0,
