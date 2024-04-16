@@ -1,11 +1,11 @@
 import { UniverseWasm } from "gol-engine";
 
-type Point = { x: number; y: number };
+type Origin = { x: number; y: number; zoom: number };
 
 class UI {
   readonly #screen: HTMLCanvasElement;
   #universe: UniverseWasm;
-  #origin: Point;
+  #origin: Origin;
 
   constructor(element: HTMLDivElement) {
     // Setup empty screen
@@ -35,7 +35,7 @@ class UI {
     this.#universe = this.#universe.add(0, 20);
 
     // Place origin
-    this.#origin = { x: 0, y: 0 };
+    this.#origin = { x: 0, y: 0, zoom: 20 };
 
     // Connect drawing and observers
     const screenObserver = new ResizeObserver(() => {
@@ -57,30 +57,52 @@ class UI {
     setTimeout(() => {
       this.#universe = this.#universe.next();
       this.#drawFirstScene();
-    }, 25);
+    }, 250);
   }
 
   redrawScene() {
     const canvasWidth = this.#screen.width;
     const canvasHeight = this.#screen.height;
+    const sceneMinX = Math.floor(this.#origin.x / this.#origin.zoom);
+    const sceneMaxX = Math.ceil(
+      (this.#origin.x + canvasWidth - 1) / this.#origin.zoom
+    );
+    const sceneWidth = sceneMaxX - sceneMinX + 1;
+    const sceneMinY = Math.floor(this.#origin.y / this.#origin.zoom);
+    const sceneMaxY = Math.ceil(
+      (this.#origin.y + canvasHeight - 1) / this.#origin.zoom
+    );
+    const sceneHeight = sceneMaxY - sceneMinY + 1;
     const scene = this.#universe.window(
-      this.#origin.y,
-      this.#origin.x,
-      this.#origin.y + canvasHeight - 1,
-      this.#origin.x + canvasWidth - 1
+      sceneMinY,
+      sceneMinX,
+      sceneMinY + sceneHeight - 1,
+      sceneMinX + sceneWidth - 1
     );
     const ctx = this.#screen.getContext("2d")!;
     const canvasData = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
-    for (let j = 0; j !== canvasHeight; ++j) {
-      for (let i = 0; i !== canvasWidth; ++i) {
-        const sceneIndex = i + j * canvasWidth;
+    for (let y = 0; y !== sceneHeight; ++y) {
+      for (let x = 0; x !== sceneWidth; ++x) {
+        const sceneIndex = x + y * sceneWidth;
         const alive = scene[sceneIndex] === "*";
 
-        const canvasIndex = sceneIndex * 4;
-        canvasData.data[canvasIndex + 0] = 0;
-        canvasData.data[canvasIndex + 1] = alive ? 255 : 0;
-        canvasData.data[canvasIndex + 2] = 0;
-        canvasData.data[canvasIndex + 3] = 255;
+        for (let j = 0; j !== this.#origin.zoom; ++j) {
+          const cy = y * this.#origin.zoom + j;
+          if (cy >= canvasHeight) {
+            break;
+          }
+          for (let i = 0; i !== this.#origin.zoom; ++i) {
+            const cx = x * this.#origin.zoom + i;
+            if (cx >= canvasWidth) {
+              break;
+            }
+            const canvasIndex = (cx + cy * canvasWidth) * 4;
+            canvasData.data[canvasIndex + 0] = 0;
+            canvasData.data[canvasIndex + 1] = alive ? 255 : 0;
+            canvasData.data[canvasIndex + 2] = 0;
+            canvasData.data[canvasIndex + 3] = 255;
+          }
+        }
       }
     }
     ctx.putImageData(canvasData, 0, 0);
