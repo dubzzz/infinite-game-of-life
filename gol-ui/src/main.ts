@@ -1,4 +1,5 @@
 import "./style.css";
 import { setupUI } from "./ui.ts";
+import init from "gol-engine"; // build it with "wasm-pack build --target web"
 
-setupUI(document.querySelector<HTMLDivElement>("#app")!);
+init().then(() => setupUI(document.querySelector<HTMLDivElement>("#app")!));
