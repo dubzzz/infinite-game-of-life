@@ -70,11 +70,28 @@ class UI {
       action = undefined;
     });
     this.#screen.addEventListener("wheel", (event) => {
-      console.log(event.deltaY);
       const dzoom = Math.sign(event.deltaY);
+      const newZoom = Math.max(1, this.#origin.zoom - dzoom);
+      // We aim for:
+      // >  o{x,y}: cell corresponding to the origina of the screen
+      // >  c{x,y}: cell corresponding to the position of the mouse
+      // >          -> we want it to be the same after the zoom
+      // >  cx = ox + event.clientX / zoom
+      // >  cx(new) = ox(new) + clientX(new) / zoom(new) = ox(new) + clientX / zoom(new)
+      // >  cx(old) = ox(old) + clientX(old) / zoom(old) = ox(old) + clientX / zoom(old)
+      // >  -> cx(new) = cx(old)
+      // >  -> ox(new) + clientX / zoom(new) = ox(old) + clientX / zoom(old)
+      // >  -> ox(new) = ox(old) + clientX / zoom(old) - clientX / zoom(new)
       this.#origin = {
-        ...this.#origin,
-        zoom: Math.max(1, this.#origin.zoom + dzoom),
+        x:
+          this.#origin.x +
+          Math.round(event.clientX / this.#origin.zoom) -
+          Math.round(event.clientX / newZoom),
+        y:
+          this.#origin.y +
+          Math.round(event.clientY / this.#origin.zoom) -
+          Math.round(event.clientY / newZoom),
+        zoom: newZoom,
       };
       this.redrawScene();
     });
