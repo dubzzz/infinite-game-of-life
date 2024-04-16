@@ -267,6 +267,12 @@ class UI {
     return { x: cx, y: cy };
   }
 
+  #pointInSceneToPointInScaledScreen(point: Point): Point {
+    const sx = point.x - Math.floor(this.#origin.x / this.#origin.zoom);
+    const sy = point.y - Math.floor(this.#origin.y / this.#origin.zoom);
+    return { x: sx, y: sy };
+  }
+
   redrawScene() {
     const canvasWidth = this.#screen.width;
     const canvasHeight = this.#screen.height;
@@ -329,9 +335,8 @@ class UI {
       }
     }
     for (const point of this.#halo) {
-      const x = point.x - Math.floor(this.#origin.x / this.#origin.zoom);
-      const y = point.y - Math.floor(this.#origin.y / this.#origin.zoom);
-      drawPoint(y, x, (previous) => Math.max(previous, 127));
+      const refined = this.#pointInSceneToPointInScaledScreen(point);
+      drawPoint(refined.y, refined.x, (previous) => Math.max(previous, 127));
     }
     ctx.putImageData(canvasData, 0, 0);
   }
