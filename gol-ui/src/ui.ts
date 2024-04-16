@@ -135,6 +135,13 @@ class UI {
       };
       this.redrawScene();
     });
+    document.addEventListener("keyup", (event) => {
+      console.log(event);
+      if (!event.ctrlKey && this.#halo.length !== 0) {
+        this.#halo = [];
+        this.redrawScene();
+      }
+    });
 
     // Connect drawing and observers
     const screenObserver = new ResizeObserver(() => {
