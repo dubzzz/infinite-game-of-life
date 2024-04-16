@@ -77,20 +77,18 @@ class UI {
       // >  c{x,y}: cell corresponding to the position of the mouse
       // >          -> we want it to be the same after the zoom
       // >  cx = ox + event.clientX / zoom
-      // >  cx(new) = ox(new) + clientX(new) / zoom(new) = ox(new) + clientX / zoom(new)
-      // >  cx(old) = ox(old) + clientX(old) / zoom(old) = ox(old) + clientX / zoom(old)
+      // >  cx(new) = ox(new) / zoom(new) + clientX(new) / zoom(new) = (ox(new) + clientX) / zoom(new)
+      // >  cx(old) = (ox(old) + clientX) / zoom(old)
       // >  -> cx(new) = cx(old)
-      // >  -> ox(new) + clientX / zoom(new) = ox(old) + clientX / zoom(old)
-      // >  -> ox(new) = ox(old) + clientX / zoom(old) - clientX / zoom(new)
+      // >  -> ox(new) = (zoom(new) / zoom(old)) * (ox(old) + clientX) - clientX
+
       this.#origin = {
         x:
-          this.#origin.x +
-          event.clientX / this.#origin.zoom -
-          event.clientX / newZoom,
+          (newZoom / this.#origin.zoom) * (this.#origin.x + event.clientX) -
+          event.clientX,
         y:
-          this.#origin.y +
-          event.clientY / this.#origin.zoom -
-          event.clientY / newZoom,
+          (newZoom / this.#origin.zoom) * (this.#origin.y + event.clientY) -
+          event.clientY,
         zoom: newZoom,
       };
       this.redrawScene();
