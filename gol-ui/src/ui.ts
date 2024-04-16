@@ -135,12 +135,12 @@ class UI {
     });
     this.#screen.addEventListener("mousemove", (event) => {
       if (action === undefined) {
+        this.#halo = [];
         if (event.ctrlKey) {
           const point = this.#pointInScreenToPointInScene({
             x: event.clientX,
             y: event.clientY,
           });
-          this.#halo = [];
           for (const delta of patterns[patternIndex]) {
             this.#halo.push({ x: point.x + delta.x, y: point.y + delta.y });
           }
