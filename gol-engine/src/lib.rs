@@ -32,11 +32,7 @@ impl UniverseWasm {
     }
 
     #[wasm_bindgen]
-    pub fn add_many(
-        &mut self,
-        row_indices: &[isize],
-        column_indices: &[isize],
-    ) -> UniverseWasm {
+    pub fn add_many(&mut self, row_indices: &[isize], column_indices: &[isize]) -> UniverseWasm {
         let mut new_universe = Universe::from(&self.universe);
         for index in 0..row_indices.len() {
             let row_index = row_indices[index];
